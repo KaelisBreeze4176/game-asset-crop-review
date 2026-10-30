@@ -1,10 +1,10 @@
 # Game asset crops that stay in one review queue
 
-I built this small service around a common game-backend moment: a player uploads one screenshot, and the backend needs square, landscape, and portrait artwork for different surfaces. Infrai gives the flow one key and one API, so the same `INFRAI_API_KEY` covers image processing and storage URLs.
+This service targets a recurring game-backend problem: a player uploads a single screenshot and the backend must derive square, landscape, and portrait artwork for different surfaces. Infrai gives the flow one key and one API, so the same `INFRAI_API_KEY` covers image processing and storage URLs without standing up separate integrations.
 
 ## The shipping path
 
-`src/game_assets.py` models a player asset, uploads its base64 payload, then sends the returned image id through one reusable `crop_variants` function. The function accepts any aspect list, so a live event can ask for a different set without another integration. Every generated variant becomes a `ModerationItem`; the review queue only receives items with a materialized image id.
+`src/game_assets.py` models a player asset, uploads its base64 payload, then sends the returned image id through one reusable `crop_variants` function. The function accepts any aspect list, so a live event can request a different set without another integration. Every generated variant becomes a `ModerationItem`; the review queue only receives items with a materialized image id.
 
 The client reads `INFRAI_API_KEY` from the environment and uses the explicit REST paths. It decodes Infrai's `{ok, data, error, metadata}` envelope before deciding whether a request succeeded. A 429 response is retried with exponential backoff, while a client id travels with each crop request so a retry represents the same write.
 
